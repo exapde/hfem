@@ -1,0 +1,94 @@
+Serial C++ code
+With default BLAS:
+g++ digasoser.cpp -o digasoser -O2 ../preprocessing/dmdserlib.a ../gmres/gmresserlib.a -lblas -llapack -lm -ldl
+
+With ACML:
+g++ digasoser.cpp -o digasoser -O2 ../preprocessing/dmdserlib.a ../gmres/gmresserlib.a -L/opt/acml5.3.1/gfortran64/lib /opt/acml5.3.1/gfortran64/lib/libacml.so -lm -ldl -lpthread -lgfortran -pthread -ldl -Wl,--export-dynamic -lnsl -lutil
+
+And
+export LD_LIBRARY_PATH=/opt/acml5.3.1/gfortran64/lib
+
+Run code:
+digasoser inputFile outputFile
+
+Parallel C++ code
+With standard BLAS:
+mpic++ digasopar.cpp -o digasopar -O2 ../preprocessing/dmdparlib.a ../gmres/gmresparlib.a -lblas -llapack -lm -ldl
+
+Using MPICH instead of Open-MPI :
+g++ digasopar.cpp -o digasopar -O2 ../preprocessing/dmdparlibmpich.a ../gmres/gmresparlib.a -I/usr/lib/mpich/include -L/usr/lib/mpich/lib -lmpi_cxx -lmpi -lblas -llapack -lm -ldl
+
+
+With ACML:
+mpic++ digasopar.cpp -o digasopar -O2 ../preprocessing/dmdparlib.a ../gmres/gmresparlib.a -L/opt/acml5.3.1/gfortran64/lib /opt/acml5.3.1/gfortran64/lib/libacml.so -lm -ldl -lpthread -lgfortran -pthread -ldl -Wl,--export-dynamic -lnsl -lutil
+
+And
+export LD_LIBRARY_PATH=/opt/acml5.3.1/gfortran64/lib
+
+Run parallel code:
+mpirun -np 4 digasopar inputFile outputFile
+
+
+
+
+Compile master library:
+Step 1:
+g++ -c masterlib.cpp
+ar rvs masterlib.a masterlib.o
+
+Step 2:
+- With default BLAS (does not work on marvin): g++ testmaster.cpp -o testmaster -O2 masterlib.a -lblas -llapack
+- With ACML BLAS: g++ testmaster.cpp -o testmaster -O2 masterlib.a -L/opt/acml5.3.1/gfortran64/lib /opt/acml5.3.1/gfortran64/lib/libacml.so -lm -ldl -lpthread -lgfortran -pthread -ldl -Wl,--export-dynamic -lnsl -lutil
+- With OpenBLAS: g++ testmaster.cpp -o testmaster -O2 masterlib.a ~/DropboxMIT/HDGv1.0/blas/OpenBLAS-0.2.14/libopenblas.a -lpthread -lgfortran
+
+Step 3:
+./testmaster
+
+Compile gmres library:
+Step 1:
+g++ -c gmreslib.cpp
+ar rvs gmreslib.a gmreslib.o
+
+
+Compile gmresmpi library:
+Step 1:
+mpic++ -c gmresmpilib.cpp
+ar rvs gmresmpilib.a gmresmpilib.o
+
+Compile assembly library:
+Step 1:
+g++ -c assemblylib.cpp
+ar rvs assemblylib.a assemblylib.o
+
+
+Compile assembly library:
+Step 1:
+mpic++ -c assemblympilib.cpp
+ar rvs assemblympilib.a assemblympilib.o
+
+Compile dmdlib library:
+Step 1:
+mpic++ -c dmdlib.cpp
+ar rvs dmdlib.a dmdlib.o
+
+Step 2:
+ mpic++ testpreprocessing.cpp -o testpreprocessing -O2 dmdlib.a -L/opt/acml5.3.1/gfortran64/lib /opt/acml5.3.1/gfortran64/lib/libacml.so -lm -ldl -lpthread -lgfortran -pthread -ldl -Wl,--export-dynamic -lnsl -lutil
+
+Step 3:
+mpirun -np 4 ./testpreprocessing poi poiout
+
+
+Compile digasompi
+mpic++ digasompi.cpp -o DIGASOMPI -O2 ../master/masterlib.a ../gmres/gmresmpilib.a -L/opt/acml5.3.1/gfortran64/lib /opt/acml5.3.1/gfortran64/lib/libacml.so -lm -ldl -lpthread -lgfortran -pthread -ldl -Wl,--export-dynamic -lnsl -lutil
+
+
+mpic++ preprocessing.cpp -o preprocessing -O2 dmdlib.a ../gmres/gmresmpilib.a -L/opt/acml5.3.1/gfortran64/lib /opt/acml5.3.1/gfortran64/lib/libacml.so -lm -ldl -lpthread -lgfortran -pthread -ldl -Wl,--export-dynamic -lnsl -lutil
+
+mpic++ testpreprocessing.cpp -o testpreprocessing -O2  dmdlib.a -L/opt/acml5.3.1/gfortran64/lib /opt/acml5.3.1/gfortran64/lib/libacml.so -lm -ldl -lpthread -lgfortran -pthread -ldl -Wl,--export-dynamic -lnsl -lutil
+
+mpic++ testdigasompi.cpp -o testdigasompi -O2  ../preprocessing/dmdlib.a -L/opt/acml5.3.1/gfortran64/lib /opt/acml5.3.1/gfortran64/lib/libacml.so -lm -ldl -lpthread -lgfortran -pthread -ldl -Wl,--export-dynamic -lnsl -lutil
+
+mpic++ testdigasompi.cpp -o testdigasompi -O2  ../preprocessing/dmdlib.a ../gmres/gmresmpilib.a -L/opt/acml5.3.1/gfortran64/lib /opt/acml5.3.1/gfortran64/lib/libacml.so -lm -ldl -lpthread -lgfortran -pthread -ldl -Wl,--export-dynamic -lnsl -lutil
+
+mpic++ testdigasompi.cpp -o testdigasompi -O2  -L/opt/acml5.3.1/gfortran64/lib /opt/acml5.3.1/gfortran64/lib/libacml.so -lm -ldl -lpthread -lgfortran -pthread -ldl -Wl,--export-dynamic -lnsl -lutil
+

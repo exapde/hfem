@@ -1,0 +1,172 @@
+clear 
+nd = 2;
+
+syms u1 u2 u3 u4 u5 u6 u7 u8 u9 
+%u10 u11 u12 u13 u14 u15 u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27
+syms uh1 uh2 uh3 uh4 uh5 uh6 uh7 uh8 uh9
+syms uinf1 uinf2 uinf3 uinf4 uinf5 uinf6 uinf7 uinf8 uinf9
+syms x1 x2 x3 
+syms nl1 nl2 nl3
+syms time
+syms param1 param2 param3 param4 param5 param6
+
+includegetan = 1;
+appname = 'mhd';
+
+if nd == 2    
+    param = [param1 param2 param3 param4];
+    udg  = [u1 u2 u3 u4 u5 u6 u7]; 
+        %u10 u11 u12 u13 u14 u15 u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27];
+    uh   = [uh1 uh2 uh3 uh4 uh5 uh6 uh7];
+    uinf = [uinf1 uinf2 uinf3 uinf4 uinf5 uinf6 uinf7];
+    pg   = [x1 x2];  
+    nl   = [nl1 nl2]; 
+else
+    param = [param1 param2 param3];
+    udg  = [u1 u2 u3 u4 u5 u6 u7 u8 u9];
+    uh   = [uh1 uh2 uh3 uh4 uh5 uh6 uh7 uh8 uh9];
+    uinf = [uinf1 uinf2 uinf3 uinf4 uinf5 uinf6 uinf7 uinf8 uinf9];
+    pg   = [x1 x2 x3];  
+    nl   = [nl1 nl2 nl3];    
+end
+
+gam  = param(1);
+gam1 = param(1) - 1.0;        
+tau  = param(2);
+alpha1 = param(3);
+alpha = param(4);
+
+ncu = length(uh);
+nc  = length(udg);
+nch = ncu;
+
+if nd == 2                                                   
+    r    = udg(1);
+    ru   = udg(2);
+    rv   = udg(3);
+    rE   = udg(4);
+    bx   = udg(5);
+    by   = udg(6);
+    phi  = udg(7);
+    
+    r1   = 1/r;
+    uv   = ru*r1;
+    vv   = rv*r1;
+    E    = rE*r1;
+    q    = 0.5*(uv*uv+vv*vv);
+    b    = (bx*bx+by*by)*0.5;
+    p    = gam1*(rE-r*q-b-0.5*phi^2);
+    h    = E+p*r1+b*r1;
+    uvb  = uv*bx+vv*by;
+    %divB = bxx+byy;
+
+    f    = [ru, ru*uv+p+b-bx*bx, rv*uv-by*bx, ru*h-uvb*bx+alpha1*phi*bx, alpha1*phi, -(vv*bx-by*uv), alpha1*bx, ...
+            rv, ru*vv-bx*by, rv*vv+p+b-by*by, rv*h-uvb*by+alpha1*phi*by, -(uv*by-bx*vv), alpha1*phi, alpha1*by];    
+      
+    rh    = uh(1);
+    ruh   = uh(2);
+    rvh   = uh(3);
+    rEh   = uh(4);
+    bxh   = uh(5);
+    byh   = uh(6);
+    phih  = uh(7);
+    
+    r1h   = 1/rh;
+    uvh   = ruh*r1h;
+    vvh   = rvh*r1h;
+    Eh    = rEh*r1h;
+    bh    = (bxh*bxh+byh*byh)*0.5;
+    qh    = 0.5*(uvh*uvh+vvh*vvh);
+    ph    = gam1*(rEh-rh*qh-bh-0.5*phih^2);
+    hh    = Eh+ph*r1h+bh*r1h;
+    uvbh  = uvh*bxh+vvh*byh;
+             
+    fh    = [ruh, ruh*uvh+ph+bh-bxh*bxh, rvh*uvh-byh*bxh, ruh*hh-uvbh*bxh+alpha1*phih*bxh, alpha1*phih, -(vvh*bxh-byh*uvh), alpha1*bxh, ...
+             rvh, ruh*vvh-bxh*byh, rvh*vvh+ph+bh-byh*byh, rvh*hh-uvbh*byh+alpha1*phih*byh, -(uvh*byh-bxh*vvh), alpha1*phih, alpha1*byh];  
+         
+    %An = tau*eye(length(uh),length(uh));
+    %An(end,end) = tau*10;
+    An = tau;
+    sh   = simplify(An*(udg(1:ncu).'-uh.'));
+    sh(end) = 10*sh(end);
+    fhat = simplify(fh(1:ncu)*nl(1) + fh(ncu+1:end)*nl(2) + sh.');
+    fh = fhat;    
+    
+%    alpha = 2.0;
+    s     = -[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, alpha*phi];
+   % s     = -[0.0, divB*bx, divB*by, divB*bz, divB*uvb, divB*uv, divB*vv, divB*wv, alpha*phi];
+    
+    filename1 = ['flux2d.m'];
+    filename2 = ['source2d.m'];
+    filename3 = ['fhat2d.m'];
+    
+else                                         
+    r    = udg(1);
+    ru   = udg(2);
+    rv   = udg(3);
+    rw   = udg(4);
+    rE   = udg(5);
+    bx   = udg(6);
+    by   = udg(7);
+    bz   = udg(8);
+    phi  = udg(9);
+    
+    alpha1 =  tau;
+    
+    r1   = 1/r;
+    uv   = ru*r1;
+    vv   = rv*r1;
+    wv   = rw*r1;
+    E    = rE*r1;
+    q    = 0.5*(uv*uv+vv*vv+wv*wv);
+    b    = (bx*bx + by*by + bz*bz)*0.5;
+    p    = gam1*(rE-r*q-b);
+    h    = E + p*r1 + b*r1;
+    uvb  = uv*bx + vv*by + wv*bz;
+
+    f    = [ru, ru*uv+p+b-bx*bx, rv*uv-by*bx    , rw*uv-bz*bx    , ru*h - uvb*bx, phi         , vv*bx-by*uv , wv*bx-bz*uv , alpha1*alpha1*bx, ...
+            rv, ru*vv-bx*by    , rv*vv+p+b-by*by, rw*vv-bz*by    , rv*h - uvb*by, uv*by-bx*vv , phi         , wv*by-bz*vv , alpha1*alpha1*by,...
+            rw, ru*wv-bx*bz    , rv*wv-by*bz    , rw*wv+p+b-bz*bz, rw*h - uvb*bz, uv*bz-bx*wv , vv*bz-by*wv , phi         , alpha1*alpha1*bz];    
+      
+    rh    = uh(1);
+    ruh   = uh(2);
+    rvh   = uh(3);
+    rwh   = uh(4);
+    rEh   = uh(5);
+    bxh   = uh(6);
+    byh   = uh(7);
+    bzh   = uh(8);
+    phih  = uh(9);
+    
+    r1h   = 1/rh;
+    uvh   = ruh*r1h;
+    vvh   = rvh*r1h;
+    wvh   = rwh*r1h;
+    Eh    = rEh*r1h;
+    bh    = (bxh*bxh + byh*byh + bzh*bzh)*0.5;
+    qh    = 0.5*(uvh*uvh+vvh*vvh+wvh*wvh);
+    ph    = gam1*(rEh-rh*qh-bh);
+    hh    = Eh+ph*r1h+bh*r1h;
+    uvbh  = uvh*bxh + vvh*byh + wvh*bzh;
+             
+    fh    = [ruh, ruh*uvh+ph+bh-bxh*bxh, rvh*uvh-byh*bxh      , rwh*uvh-bzh*bxh      , ruh*hh - uvbh*bxh, phih            , vvh*bxh-byh*uvh , wvh*bxh-bzh*uvh , alpha1*alpha1*bxh, ...
+            rvh, ruh*vvh-bxh*byh      , rvh*vvh+ph+bh-byh*byh, rwh*vvh-bzh*byh      , rvh*hh - uvbh*byh, uvh*byh-bxh*vvh , phih            , wvh*byh-bzh*vvh , alpha1*alpha1*byh,...
+            rwh, ruh*wvh-bxh*bzh      , rvh*wvh-byh*bzh      , rwh*wvh+ph+bh-bzh*bzh, rwh*hh - uvbh*bzh, uvh*bzh-bxh*wvh , vvh*bzh-byh*wvh , phih            , alpha1*alpha1*bzh];  
+      
+    An    = tau;% symAn(uh,nl,param(1),2);
+    sh    = simplify(An*(udg(1:ncu).'-uh.'));
+    fhat  = simplify(fh(1:ncu)*nl(1) + fh(ncu+1:2*ncu)*nl(2) + fh(2*ncu+1:end)*nl(3) + sh.'); 
+    fh = fhat;
+    
+    filename1 = ['flux3d.m'];
+    filename2 = ['source3d.m'];
+    filename3 = ['fhat3d.m'];
+
+end
+
+filename4 = ['fbou.m'];
+
+
+genmatlabcode; % generate source codes
+
+

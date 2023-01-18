@@ -1,0 +1,29 @@
+function [f,f_udg] = avflux2d(pg,udg,param,time)
+
+cpar = 20.0;
+[ng,nc] = size(udg);
+nch  = 4;
+
+rmin = param{8};
+r = udg(:,1);
+
+inda = find(cpar*r/rmin>30);
+sa = sensor2d1(pg(inda,:),udg(inda,:),param,time);
+ia = sa>30;
+ind1 = inda(ia);
+ind2 = setdiff(inda,ind1);
+
+indb = setdiff(1:length(r),inda);
+sb = sensor2d2(pg(indb,:),udg(indb,:),param,time);
+ib = sb>30;
+ind3 = indb(ib);
+ind4 = setdiff(indb,ind3);
+
+f = zeros(ng,nch,2);
+f_udg = zeros(ng,nch,2,nc);
+
+[f(ind1,:,:),f_udg(ind1,:,:,:)] = avflux2d1(pg(ind1,:),udg(ind1,:),param,time);
+[f(ind2,:,:),f_udg(ind2,:,:,:)] = avflux2d2(pg(ind2,:),udg(ind2,:),param,time);
+[f(ind3,:,:),f_udg(ind3,:,:,:)] = avflux2d3(pg(ind3,:),udg(ind3,:),param,time);
+[f(ind4,:,:),f_udg(ind4,:,:,:)] = avflux2d4(pg(ind4,:),udg(ind4,:),param,time);
+

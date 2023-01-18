@@ -1,0 +1,20 @@
+function UDG = exactsolAlfven3(p,t)
+
+p1 = size(p,1);
+p3 = size(p,3);
+UDG = zeros(p1,7,p3);
+x = p(:,1,:);
+y = p(:,2,:);
+theta = pi/4;
+gam = 5/3;
+xx = x*cos(theta) + y*sin(theta);
+UDG(:,1,:) = ones(size(UDG(:,1,:)));
+UDG(:,2,:) = -0.1*sin(2*pi*xx)*sin(theta).*UDG(:,1,:);
+UDG(:,3,:) = 0.1*sin(2*pi*xx)*cos(theta).*UDG(:,1,:);
+UDG(:,4,:) = 0.1*cos(2*pi*xx);
+UDG(:,6,:) = -0.1*sin(2*pi*xx)*sin(theta) + ones(size(UDG(:,1,:)));
+UDG(:,7,:) = 0.1*sin(2*pi*xx)*cos(theta) + ones(size(UDG(:,1,:)))*sin(theta);
+UDG(:,8,:) = UDG(:,4,:);
+b = UDG(:,5,:).*UDG(:,5,:) + UDG(:,6,:).*UDG(:,6,:);
+v = UDG(:,2,:).*UDG(:,2,:) + UDG(:,3,:).*UDG(:,3,:);
+UDG(:,5,:) = 0.1/(gam-1)*UDG(:,1,:) + UDG(:,1,:).*v*0.5 + b*0.5;

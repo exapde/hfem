@@ -1,0 +1,125 @@
+function checksol(udg,param)
+
+gam = param{1};
+gam1 = gam-1;
+rpar = param{8};
+hpar = 1.0;
+apar = 10.0;
+bpar = 0.5;
+cpar = 20.0;
+
+
+r    = udg(:,1,:);
+ru   = udg(:,2,:);
+rv   = udg(:,3,:);
+rE   = udg(:,4,:);
+
+rx   = udg(:,5,:);
+rux  = udg(:,6,:);
+rvx  = udg(:,7,:);
+rEx  = udg(:,8,:);
+
+ry   = udg(:,9,:);
+ruy  = udg(:,10,:);
+rvy  = udg(:,11,:);
+rEy  = udg(:,12,:);
+
+% inviscid flux without density regularization
+r1   = 1./r;
+u    = ru.*r1;
+v    = rv.*r1;    
+E    = rE.*r1;
+q    = 0.5*(u.*u+v.*v);
+p    = (gam-1)*(rE-r.*q);    
+h    = E+p.*r1;    
+
+disp('----- inviscid flux without density regularization -----');
+fprintf('density:  [%e, %e ] \n', [min(r(:)) max(r(:))]);
+fprintf('pressure:  [%e, %e ] \n', [min(p(:)) max(p(:))]);
+fprintf('energy:  [%e, %e ] \n', [min(E(:)) max(E(:))]);
+fprintf('enthalpy:  [%e, %e ] \n', [min(h(:)) max(h(:))]);
+%fprintf('Old residual: %e,   New residual: %e    %e\n', [duh0 duh alfa]);       
+
+% f    = [ru, ru*u+p, rv*u,   ru*h, ...
+%         rv, ru*v,   rv*v+p, rv*h];            
+
+% inviscid flux with density regularization
+rt   = (1/cpar)*log(cpar+exp(cpar*(r/rpar)))*rpar;
+r1   = 1./rt;
+u    = ru.*r1;
+v    = rv.*r1;
+E    = rE.*r1;
+q    = 0.5*(u.*u+v.*v);
+p    = gam1*(rE-rt.*q);
+h    = E+p.*r1;    
+
+disp('----- inviscid flux with density regularization -----');
+fprintf('density:  [%e, %e ] \n', [min(rr(:)) max(r(:))]);
+fprintf('pressure:  [%e, %e ] \n', [min(p(:)) max(p(:))]);
+fprintf('energy:  [%e, %e ] \n', [min(E(:)) max(E(:))]);
+fprintf('enthalpy:  [%e, %e ] \n', [min(h(:)) max(h(:))]);
+
+% % c    = sqrt(gam*p.*r1);    
+% % cst  = sqrt((2*gam*p.*r1 + (gam-1)*(u.^2 + v.^2))/(gam+1));
+% 
+% ux  = (rux - rx*u)*r1;    
+% vx  = (rvx - rx*v)*r1;                       
+% qx  = u*ux + v*vx;
+% px  = gam1*(rEx - rx*q - r*qx);
+% rHx = rEx+px;
+% 
+% uy  = (ruy - ry*u)*r1;    
+% vy  = (rvy - ry*v)*r1;   
+% qy  = u*uy + v*vy;
+% py  = gam1*(rEy - ry*q - r*qy);
+% rHy = rEy+py;
+% 
+% Div = ux+vy;                 
+% Ind = Div*hpar/cst;
+% Fnd = (1/apar)*log(1+exp(apar*(Ind-bpar)));
+% Gnd = hpar*(c + sqrt(u^2 + v^2));
+% Av1 = Gnd*(Ind-bpar);
+% Av2 = Gnd*Fnd;    
+% s1  = apar*(Ind-bpar);
+% 
+% f1   = [Av1*rx, Av1*rux, Av1*rvx,  Av1*rHx, ...
+%         Av1*ry, Av1*ruy, Av1*rvy,  Av1*rHy];        
+% f2   = [Av2*rx, Av2*rux, Av2*rvx,  Av2*rHx, ...
+%         Av2*ry, Av2*ruy, Av2*rvy,  Av2*rHy];
+% 
+% rt   = (1/cpar)*log(cpar+exp(cpar*(r/rpar)))*rpar;    
+% r1   = 1/rt;
+% u    = ru*r1;
+% v    = rv*r1;            
+% q    = 0.5*(u*u+v*v);
+% p    = (gam-1)*(rE-rt*q);    
+% c    = sqrt(gam*p*r1);    
+% cst  = sqrt((2*gam*p*r1 + (gam-1)*(u^2 + v^2))/(gam+1));
+% 
+% ux  = (rux - rx*u)*r1;    
+% vx  = (rvx - rx*v)*r1;                       
+% qx  = u*ux + v*vx;
+% rtx = rx*(exp((cpar*r)/rpar)/(cpar+exp((cpar*r)/rpar)));
+% px  = gam1*(rEx - rtx*q - rt*qx);
+% rHx = rEx+px;
+% 
+% uy  = (ruy - ry*u)*r1;    
+% vy  = (rvy - ry*v)*r1;   
+% qy  = u*uy + v*vy;
+% rty = ry*(exp((cpar*r)/rpar)/(cpar+exp((cpar*r)/rpar)));
+% py  = gam1*(rEy - rty*q - rt*qy);
+% rHy = rEy+py;
+% 
+% Div = ux+vy;                 
+% Ind = Div*hpar/cst;
+% Fnd = (1/apar)*log(1+exp(apar*(Ind-bpar)));
+% Gnd = hpar*(c + sqrt(u^2 + v^2));
+% Av3 = Gnd*(Ind-bpar);
+% Av4 = Gnd*Fnd;    
+% s2  = apar*(Ind-bpar);
+% 
+% % warning messages
+% if Err(1)<=0
+%     warning('negative density');
+% end
+% 

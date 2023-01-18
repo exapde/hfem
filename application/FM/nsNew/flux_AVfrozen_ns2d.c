@@ -1,0 +1,329 @@
+
+// Written by C. Nguyen and P. Fernandez
+
+void flux_AVfrozen_ns2d(double *f, double *f_udg, double *pg, double *udg, double *udg_0, appstruct &app, double *param, double time, int ng, int nc, int ncu, int nd, int ncd, int computeJacobian)
+{
+// Artificial viscosity fluxes. Latest version of the model.
+		
+	double rampFactor;
+	double porder = (double) app.porder[0];
+	double alpha = 100.0;
+	double bbeta = 1.0e-2;
+	double k_h = 1.5;
+	double eps_v = 1.0e-8;
+
+	double gam = param[0];
+	double Minf = param[4];
+
+	for (int i = 0; i <ng; i++) {
+		double u1 = udg[0*ng+i];
+		double u2 = udg[1*ng+i];
+		double u3 = udg[2*ng+i];
+		double u4 = udg[3*ng+i];
+		double u5 = udg[4*ng+i];
+		double u6 = udg[5*ng+i];
+		double u7 = udg[6*ng+i];
+		double u8 = udg[7*ng+i];
+		double u9 = udg[8*ng+i];
+		double u10 = udg[9*ng+i];
+		double u11 = udg[10*ng+i];
+		double u12 = udg[11*ng+i];
+
+		double u1_0 = udg_0[0*ng+i];
+		double u2_0 = udg_0[1*ng+i];
+		double u3_0 = udg_0[2*ng+i];
+		double u4_0 = udg_0[3*ng+i];
+		double u5_0 = udg_0[4*ng+i];
+		double u6_0 = udg_0[5*ng+i];
+		double u7_0 = udg_0[6*ng+i];
+		double u8_0 = udg_0[7*ng+i];
+		double u9_0 = udg_0[8*ng+i];
+		double u10_0 = udg_0[9*ng+i];
+		double u11_0 = udg_0[10*ng+i];
+		double u12_0 = udg_0[11*ng+i];
+
+		double h = pg[2*ng+i];
+		double wallDistance = pg[3*ng+i];
+		rampFactor = (1.0 - 1.0/(10.0*wallDistance+1.0)) * app.rampFactor;
+
+		double r = u1;
+		double ru = u2;
+		double rv = u3;
+		double rE = u4;
+		double rx = u5;
+		double rux = u6;
+		double rvx = u7;
+		double rEx = u8;
+		double ry = u9;
+		double ruy = u10;
+		double rvy = u11;
+		double rEy = u12;
+
+		double u = ru/r;
+		double v = rv/r;
+		double ux = (rux - u*rx)/r;
+		double vy = (rvy - v*ry)/r;
+
+		double r_0 = u1_0;
+		double ru_0 = u2_0;
+		double rv_0 = u3_0;
+		double rE_0 = u4_0;
+		double rx_0 = u5_0;
+		double rux_0 = u6_0;
+		double rvx_0 = u7_0;
+		double rEx_0 = u8_0;
+		double ry_0 = u9_0;
+		double ruy_0 = u10_0;
+		double rvy_0 = u11_0;
+		double rEy_0 = u12_0;
+
+		double u_0 = ru_0/r_0;
+		double v_0 = rv_0/r_0;
+		double ux_0 = (rux_0 - u_0*rx_0)/r_0;
+		double vy_0 = (rvy_0 - v_0*ry_0)/r_0;
+
+		double t2 = 1.0/porder;
+		double t3 = 1.0/r_0;
+		double t13 = ru_0*rx_0*t3;
+		double t4 = rux_0-t13;
+		double t5 = t3*t4;
+		double t14 = rv_0*ry_0*t3;
+		double t6 = rvy_0-t14;
+		double t7 = t3*t6;
+		double t8 = t5+t7;
+		double t15 = h*k_h*t2*t8;
+		double t9 = bbeta-t15;
+		double t10 = 1.0/3.141592653589793;
+		double t11 = 1.0/Minf;
+		double t12 = t11+1.0;
+		double t16 = alpha*t9;
+		double t17 = atan(t16);
+		double t18 = t10*t17;
+		double t19 = t18-1.0/2.0;
+		double t20 = t9*t19;
+		double t21 = atan(alpha);
+		double t23 = t10*t21;
+		double t22 = t20-t23+1.0/2.0;
+		double t24 = 1.0/(r*r);
+		double t25 = 1.0/r;
+		double t26 = gam*(1.0/2.0);
+		double t27 = t26-1.0/2.0;
+		double t28 = ru*ru;
+		double t29 = rv*rv;
+
+		f[0*ng+i] += h*k_h*rampFactor*rx*t2*t12*t22;
+		f[1*ng+i] += h*k_h*rampFactor*rux*t2*t12*t22;
+		f[2*ng+i] += h*k_h*rampFactor*rvx*t2*t12*t22;
+		f[3*ng+i] += h*k_h*rampFactor*t2*t12*t22*(gam*rEx-t27*(rx*t24*t28+rx*t24*t29+ru*t25*(rux-ru*rx*t25)*2.0+rv*t25*(rvx-rv*rx*t25)*2.0));
+		f[4*ng+i] += h*k_h*rampFactor*ry*t2*t12*t22;
+		f[5*ng+i] += h*k_h*rampFactor*ruy*t2*t12*t22;
+		f[6*ng+i] += h*k_h*rampFactor*rvy*t2*t12*t22;
+		f[7*ng+i] += h*k_h*rampFactor*t2*t12*t22*(gam*rEy-t27*(ry*t24*t28+ry*t24*t29+ru*t25*(ruy-ru*ry*t25)*2.0+rv*t25*(rvy-rv*ry*t25)*2.0));
+	}
+
+	if (computeJacobian == 1) {
+		for (int i = 0; i <ng; i++) {
+			double u1 = udg[0*ng+i];
+			double u2 = udg[1*ng+i];
+			double u3 = udg[2*ng+i];
+			double u4 = udg[3*ng+i];
+			double u5 = udg[4*ng+i];
+			double u6 = udg[5*ng+i];
+			double u7 = udg[6*ng+i];
+			double u8 = udg[7*ng+i];
+			double u9 = udg[8*ng+i];
+			double u10 = udg[9*ng+i];
+			double u11 = udg[10*ng+i];
+			double u12 = udg[11*ng+i];
+
+			double u1_0 = udg_0[0*ng+i];
+			double u2_0 = udg_0[1*ng+i];
+			double u3_0 = udg_0[2*ng+i];
+			double u4_0 = udg_0[3*ng+i];
+			double u5_0 = udg_0[4*ng+i];
+			double u6_0 = udg_0[5*ng+i];
+			double u7_0 = udg_0[6*ng+i];
+			double u8_0 = udg_0[7*ng+i];
+			double u9_0 = udg_0[8*ng+i];
+			double u10_0 = udg_0[9*ng+i];
+			double u11_0 = udg_0[10*ng+i];
+			double u12_0 = udg_0[11*ng+i];
+
+			double h = pg[2*ng+i];
+			double wallDistance = pg[3*ng+i];
+			rampFactor = (1.0 - 1.0/(10.0*wallDistance+1.0)) * app.rampFactor;
+
+			double r = u1;
+			double ru = u2;
+			double rv = u3;
+			double rE = u4;
+			double rx = u5;
+			double rux = u6;
+			double rvx = u7;
+			double rEx = u8;
+			double ry = u9;
+			double ruy = u10;
+			double rvy = u11;
+			double rEy = u12;
+
+			double u = ru/r;
+			double v = rv/r;
+			double ux = (rux - u*rx)/r;
+			double vy = (rvy - v*ry)/r;
+
+			double r_0 = u1_0;
+			double ru_0 = u2_0;
+			double rv_0 = u3_0;
+			double rE_0 = u4_0;
+			double rx_0 = u5_0;
+			double rux_0 = u6_0;
+			double rvx_0 = u7_0;
+			double rEx_0 = u8_0;
+			double ry_0 = u9_0;
+			double ruy_0 = u10_0;
+			double rvy_0 = u11_0;
+			double rEy_0 = u12_0;
+
+			double u_0 = ru_0/r_0;
+			double v_0 = rv_0/r_0;
+			double ux_0 = (rux_0 - u_0*rx_0)/r_0;
+			double vy_0 = (rvy_0 - v_0*ry_0)/r_0;
+
+			double t2 = 1.0/(r*r);
+			double t3 = 1.0/r;
+			double t4 = 1.0/porder;
+			double t5 = 1.0/r_0;
+			double t17 = ru_0*rx_0*t5;
+			double t6 = rux_0-t17;
+			double t7 = t5*t6;
+			double t18 = rv_0*ry_0*t5;
+			double t8 = rvy_0-t18;
+			double t9 = t5*t8;
+			double t10 = t7+t9;
+			double t19 = h*k_h*t4*t10;
+			double t11 = bbeta-t19;
+			double t12 = 1.0/3.141592653589793;
+			double t13 = 1.0/Minf;
+			double t14 = t13+1.0;
+			double t15 = gam*(1.0/2.0);
+			double t16 = t15-1.0/2.0;
+			double t20 = alpha*t11;
+			double t21 = atan(t20);
+			double t22 = t12*t21;
+			double t23 = t22-1.0/2.0;
+			double t24 = t11*t23;
+			double t25 = atan(alpha);
+			double t28 = t12*t25;
+			double t26 = t24-t28+1.0/2.0;
+			double t27 = rux-ru*rx*t3;
+			double t29 = ruy-ru*ry*t3;
+			double t30 = rvx-rv*rx*t3;
+			double t31 = rvy-rv*ry*t3;
+			double t32 = h*k_h*rampFactor*t4*t14*t26;
+			double t33 = ru*ru;
+			double t34 = t2*t33;
+			double t35 = rv*rv;
+			double t36 = t2*t35;
+			double t37 = t34+t36;
+			double t38 = h*k_h*rampFactor*t4*t14*t16*t26*t37;
+			double t39 = gam*h*k_h*rampFactor*t4*t14*t26;
+
+			f_udg[0*ng+i] += 0.0;
+			f_udg[1*ng+i] += 0.0;
+			f_udg[2*ng+i] += 0.0;
+			f_udg[3*ng+i] += h*k_h*rampFactor*t4*t14*t16*t26*(ru*t2*t27*2.0+rv*t2*t30*2.0);
+			f_udg[4*ng+i] += 0.0;
+			f_udg[5*ng+i] += 0.0;
+			f_udg[6*ng+i] += 0.0;
+			f_udg[7*ng+i] += h*k_h*rampFactor*t4*t14*t16*t26*(ru*t2*t29*2.0+rv*t2*t31*2.0);
+			f_udg[8*ng+i] += 0.0;
+			f_udg[9*ng+i] += 0.0;
+			f_udg[10*ng+i] += 0.0;
+			f_udg[11*ng+i] += h*k_h*rampFactor*t3*t4*t14*t16*t26*t27*-2.0;
+			f_udg[12*ng+i] += 0.0;
+			f_udg[13*ng+i] += 0.0;
+			f_udg[14*ng+i] += 0.0;
+			f_udg[15*ng+i] += h*k_h*rampFactor*t3*t4*t14*t16*t26*t29*-2.0;
+			f_udg[16*ng+i] += 0.0;
+			f_udg[17*ng+i] += 0.0;
+			f_udg[18*ng+i] += 0.0;
+			f_udg[19*ng+i] += h*k_h*rampFactor*t3*t4*t14*t16*t26*t30*-2.0;
+			f_udg[20*ng+i] += 0.0;
+			f_udg[21*ng+i] += 0.0;
+			f_udg[22*ng+i] += 0.0;
+			f_udg[23*ng+i] += h*k_h*rampFactor*t3*t4*t14*t16*t26*t31*-2.0;
+			f_udg[24*ng+i] += 0.0;
+			f_udg[25*ng+i] += 0.0;
+			f_udg[26*ng+i] += 0.0;
+			f_udg[27*ng+i] += 0.0;
+			f_udg[28*ng+i] += 0.0;
+			f_udg[29*ng+i] += 0.0;
+			f_udg[30*ng+i] += 0.0;
+			f_udg[31*ng+i] += 0.0;
+			f_udg[32*ng+i] += t32;
+			f_udg[33*ng+i] += 0.0;
+			f_udg[34*ng+i] += 0.0;
+			f_udg[35*ng+i] += t38;
+			f_udg[36*ng+i] += 0.0;
+			f_udg[37*ng+i] += 0.0;
+			f_udg[38*ng+i] += 0.0;
+			f_udg[39*ng+i] += 0.0;
+			f_udg[40*ng+i] += 0.0;
+			f_udg[41*ng+i] += t32;
+			f_udg[42*ng+i] += 0.0;
+			f_udg[43*ng+i] += h*k_h*rampFactor*ru*t3*t4*t14*t16*t26*-2.0;
+			f_udg[44*ng+i] += 0.0;
+			f_udg[45*ng+i] += 0.0;
+			f_udg[46*ng+i] += 0.0;
+			f_udg[47*ng+i] += 0.0;
+			f_udg[48*ng+i] += 0.0;
+			f_udg[49*ng+i] += 0.0;
+			f_udg[50*ng+i] += t32;
+			f_udg[51*ng+i] += h*k_h*rampFactor*rv*t3*t4*t14*t16*t26*-2.0;
+			f_udg[52*ng+i] += 0.0;
+			f_udg[53*ng+i] += 0.0;
+			f_udg[54*ng+i] += 0.0;
+			f_udg[55*ng+i] += 0.0;
+			f_udg[56*ng+i] += 0.0;
+			f_udg[57*ng+i] += 0.0;
+			f_udg[58*ng+i] += 0.0;
+			f_udg[59*ng+i] += t39;
+			f_udg[60*ng+i] += 0.0;
+			f_udg[61*ng+i] += 0.0;
+			f_udg[62*ng+i] += 0.0;
+			f_udg[63*ng+i] += 0.0;
+			f_udg[64*ng+i] += 0.0;
+			f_udg[65*ng+i] += 0.0;
+			f_udg[66*ng+i] += 0.0;
+			f_udg[67*ng+i] += 0.0;
+			f_udg[68*ng+i] += t32;
+			f_udg[69*ng+i] += 0.0;
+			f_udg[70*ng+i] += 0.0;
+			f_udg[71*ng+i] += t38;
+			f_udg[72*ng+i] += 0.0;
+			f_udg[73*ng+i] += 0.0;
+			f_udg[74*ng+i] += 0.0;
+			f_udg[75*ng+i] += 0.0;
+			f_udg[76*ng+i] += 0.0;
+			f_udg[77*ng+i] += t32;
+			f_udg[78*ng+i] += 0.0;
+			f_udg[79*ng+i] += h*k_h*rampFactor*ru*t3*t4*t14*t16*t26*-2.0;
+			f_udg[80*ng+i] += 0.0;
+			f_udg[81*ng+i] += 0.0;
+			f_udg[82*ng+i] += 0.0;
+			f_udg[83*ng+i] += 0.0;
+			f_udg[84*ng+i] += 0.0;
+			f_udg[85*ng+i] += 0.0;
+			f_udg[86*ng+i] += t32;
+			f_udg[87*ng+i] += h*k_h*rampFactor*rv*t3*t4*t14*t16*t26*-2.0;
+			f_udg[88*ng+i] += 0.0;
+			f_udg[89*ng+i] += 0.0;
+			f_udg[90*ng+i] += 0.0;
+			f_udg[91*ng+i] += 0.0;
+			f_udg[92*ng+i] += 0.0;
+			f_udg[93*ng+i] += 0.0;
+			f_udg[94*ng+i] += 0.0;
+			f_udg[95*ng+i] += t39;
+		}
+	}
+}

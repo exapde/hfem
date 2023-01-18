@@ -1,0 +1,51 @@
+
+
+%        master    :    Master structure
+%        mesh      :    Mesh structure
+%        app       :    Application structure
+%        part      :    Partition structure
+%
+%        UDG       :    Current solution UDG = (u,g,p,q)
+%        UH        :    Current numerical trace
+%        SH        :    Source term
+%
+%        DUDG      :    Local solutions due to residual
+%        DUDH_duh  :    Local solutions due to the numerical trace
+%        DUDH_dp   :    Local solutions due to pressure (Augmented Lagrangian)
+%        AE        :    Elemental stiffness matrices
+%        FE        :    Elemental residual vectors
+%        FE_dp     :    Elemental residual vectors due to pressure (Augmented Lagrangian)
+%
+%        dim       :    Dimension 
+%        npl       :    Number of DG nodes per element
+%        ne        :    Number of elements
+%        nd        :    Dimension
+%        nps       :    Number of DG nodes per side/face 
+%        ng        :    Number of Gauss points per element
+%        ngs       :    Number of Gauss points per side/face
+%        nc        :    Number of conservative variables in the solution
+%        ncu       :    Number of primary field variables
+%        nch       :    Number of unknowns in the numerical trace       
+%        nb        :    Number of blocks/subdomains  
+%        ns        :    Number of elements per block
+%        nf        :    Number of faces
+%        npe       :    Number of vertex nodes per element
+%        nfe       :    Number of faces per element
+%        npf       :    Number of vertex nodes per face
+%
+%        time      :    Time (for time dependent mode only)
+%        tdep      :    Flag for time-dependent problems
+%        wave      :    Flag for wave propagation problems
+%        alag      :    Flag for the augmented Lagrangian iteration
+%        elcon     :    Element connectivities
+%        perm      :    Index mapping to obtain DG nodes on sides/faces
+%
+%        flg_q     :    Flag for the q equation
+%        flg_p     :    Flag for the p equation
+%        flg_g     :    Flag for the GCL equation
+%        fc_q      :    Factor the q equation
+%        fc_p      :    Factor the p equation
+%        fc_u      :    Factor the u equation
+%        alpha     :    Factor for the augmented Lagrangian iteration
+
+

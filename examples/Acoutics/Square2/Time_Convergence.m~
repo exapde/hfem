@@ -1,0 +1,49 @@
+%% All Explicit dt = 0.0005
+load('/home/lkolkman/Dropbox (MIT)/research_2/Error_Plots/Time_Convergence/p3nref8_dt0.0005.mat')
+load('Sq_Ref_Solution_Simplified.mat')
+
+% Calculate Error in Comparison to the Implicit Mesh
+errexp1 = calerror_IM_reference(UDGexpAll,meshEX,master,UDGimpAll_REF,meshIM_REF,time);
+
+
+%% dt = 0.0009
+load('/home/lkolkman/Dropbox (MIT)/research_2/Error_Plots/Time_Convergence/p3nref8_dt0.0009.mat')
+
+% Calculate Error in Comparison to the Implicit Mesh
+errexp2 = calerror_IM_reference(UDGexpAll,meshEX,master,UDGimpAll_REF,meshIM_REF,time);
+errimp2 = calerror_IM_reference(UDGimpAll,meshIM,master,UDGimpAll_REF,meshIM_REF,time);
+
+
+
+%% dt = 0.0013
+load('/home/lkolkman/Dropbox (MIT)/research_2/Error_Plots/Time_Convergence/p3nref8_dt0.0013.mat')
+
+% Calculate Error in Comparison to the Implicit Mesh
+errexp3 = calerror_IM_reference(UDGexpAll,meshEX,master,UDGimpAll_REF,meshIM_REF,time);
+errimp3 = calerror_IM_reference(UDGimpAll,meshIM,master,UDGimpAll_REF,meshIM_REF,time);
+
+
+%% dt = 0.0014
+load('/home/lkolkman/Dropbox (MIT)/research_2/Error_Plots/Time_Convergence/p3nref8_dt0.0014.mat')
+
+% Calculate Error in Comparison to the Implicit Mesh
+errexp4 = calerror_IM_reference(UDGexpAll,meshEX,master,UDGimpAll_REF,meshIM_REF,time);
+errimp4 = calerror_IM_reference(UDGimpAll,meshIM,master,UDGimpAll_REF,meshIM_REF,time);
+
+
+%% All Implicit dt = 0.0016
+load('/home/lkolkman/Dropbox (MIT)/research_2/Error_Plots/Time_Convergence/p3nref8_dt0.0016.mat')
+
+% Calculate Error in Comparison to the Implicit Mesh
+errimp5 = calerror_IM_reference(UDGimpAll,meshIM,master,UDGimpAll_REF,meshIM_REF,time);
+
+
+%% Computed Error
+err1 = errexp1;
+err2 = sqrt(errexp2.^2 + errimp2.^2);
+err3 = sqrt(errexp3.^2 + errimp3.^2);
+err4 = sqrt(errexp4.^2 + errimp4.^2);
+err5 = errimp5;
+
+
+All_Error = [err, err2, err3, err4, err5];
